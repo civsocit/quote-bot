@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "quote-bot"
 version = "0.1.0"
-description = "Quotes constructor bot for civsoc"
+description = "Quote bot for civsoc"
 authors = ["mihalin <stopa3.10.1996@mail.ru>"]
 license = "MIT"
 
