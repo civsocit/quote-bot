@@ -6,7 +6,7 @@ from aiogram import Bot
 from aiogram.dispatcher.handler import CancelHandler, current_handler
 from aiogram.dispatcher.middlewares import BaseMiddleware
 
-from constructor_bot.settings import BotSettings
+from quote_bot.settings import BotSettings
 
 
 class Privileges(IntEnum):

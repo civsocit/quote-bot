@@ -10,8 +10,8 @@ from typing import Dict, Iterable, Optional, Tuple
 from aiogram.types import Document
 from PIL import Image, UnidentifiedImageError
 
-from constructor_bot.designer import add_text_on_image
-from constructor_bot.settings import DesignerSettings
+from quote_bot.designer import add_text_on_image
+from quote_bot.settings import DesignerSettings
 
 
 def calculate_brightness(image) -> float:
