@@ -30,8 +30,6 @@ class Template:
         self._path = path
 
         self._pil_image = Image.open(path)
-        scale = ceil(DesignerSettings.default_width() / self._pil_image.width)
-        self._pil_image.load(scale=scale)  # High resolution
 
         with BytesIO() as output:
             preview = self.pil_image
@@ -58,34 +56,27 @@ class Template:
     @property
     def text_color(self):
         return {
-            TemplateType.black: DesignerSettings.text_color_dark(),
-            TemplateType.white: DesignerSettings.text_color_light(),
+            TemplateType.black: DesignerSettings.text_color_light(),
+            TemplateType.white: DesignerSettings.text_color_dark(),
         }[self._type]
 
 
 class TemplatesManager:
     _path_to_templates: str = dirname(realpath(__file__))
-    template_format: str = ".eps"
+    template_format: str = ".png"
 
     def __init__(self):
         self._templates = dict()
 
-    @classmethod
-    def _template_files(cls) -> Iterable[str]:
-        for filename in listdir(cls._path_to_templates):
-            path = join_path(cls._path_to_templates, filename)
-            if path.endswith(cls.template_format):
-                yield path
-
     async def update_templates(self):
         self._templates = {
-            "black": Template(join_path(self._path_to_templates, "Quot-bot-Black.eps"), TemplateType.black),
-            "white": Template(join_path(self._path_to_templates, "Quot-bot-White.eps"), TemplateType.white),
+            "black": Template(join_path(self._path_to_templates, "Quot-bot-285.png"), TemplateType.black),
+            "white": Template(join_path(self._path_to_templates, "Quot-bot-185.png"), TemplateType.white),
         }
 
     def all_templates(self) -> Dict[str, Template]:
         return self._templates
 
-    def process_template(self, identifier: str, text: str) -> Tuple[bytes, bytes]:
+    def process_template(self, identifier: str, text: str) -> bytes:
         template = self._templates[identifier]
         return add_text_on_image(template.pil_image, text, template.text_color)

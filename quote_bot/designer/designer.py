@@ -7,12 +7,13 @@ from ..optimizator import optimize_font_size
 from ..settings import DesignerSettings
 
 
-def add_text_on_image(pil_image, text: str, color: Tuple[int, int, int]) -> Tuple[bytes, bytes]:
+def add_text_on_image(pil_image, text: str, color: Tuple[int, int, int]) -> bytes:
     """
     Add text on Pillow image
     :param pil_image: Pillow image
     :param text: text to add
-    :return: Tuple [PNG preview, PDF image] (files, bytes)
+    :param color: text color RGB
+    :return: PNG Image (bytes)
     """
 
     x0, y0, x1, y1 = DesignerSettings.text_position()
@@ -33,13 +34,7 @@ def add_text_on_image(pil_image, text: str, color: Tuple[int, int, int]) -> Tupl
 
     # Convert to bytes
     with io.BytesIO() as output:
-        pil_image.save(output, format="PDF")
-        pdf = output.getvalue()  # Original size
-
-    # Convert to bytes for preview
-    with io.BytesIO() as output:
-        pil_image.thumbnail((DesignerSettings.default_preview_width(), DesignerSettings.default_width()))
         pil_image.save(output, format="PNG")
-        preview = output.getvalue()  # PNG preview
+        png = output.getvalue()  # Original size
 
-    return preview, pdf
+    return png

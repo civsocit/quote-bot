@@ -56,4 +56,4 @@ class DesignerSettings:
 
     @classmethod
     def max_font_size(cls) -> int:
-        return 400
+        return 200

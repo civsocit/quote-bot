@@ -63,9 +63,9 @@ async def process_text(message: types.Message, state: FSMContext):
             )
         else:
             await message.answer("Рисую плакат, ждите ... (до ~15 секунд)")
-            preview, pdf = templates_manager.process_template(template, message.text)
-            await message.answer_photo(preview)
-            await message.answer_document(InputFile(BytesIO(pdf), filename=f"{template}_poster.pdf"))
+            png = templates_manager.process_template(template, message.text)
+            await message.answer_photo(png)
+            await message.answer_document(InputFile(BytesIO(png), filename=f"{template}_poster.png"))
 
 
 @dp.callback_query_handler()

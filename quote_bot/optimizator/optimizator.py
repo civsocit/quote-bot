@@ -95,4 +95,5 @@ def optimize_font_size(
         key=lambda x: x.fun,
     )
     font_size, max_text_len = _vec_to_val(best.x)
+    print(font_size)
     return font_size, _wrap_word(text, max_text_len)
