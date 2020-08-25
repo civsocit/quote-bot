@@ -37,7 +37,7 @@ def _target(
     path_to_font: str,
     drawer,
     max_font: Optional[int] = None,
-    wrap: bool = True
+    wrap: bool = True,
 ) -> int:
     """
     Minimize me!
@@ -61,9 +61,9 @@ def _target(
     return -font_size  # Font size must be biggest
 
 
-def optimize_font_size(image, max_width: int, max_height: int,
-                       text: str, font_path: str, max_font: Optional[int] = None,
-                       wrap: bool = True) -> Tuple[int, str]:
+def optimize_font_size(
+    image, max_width: int, max_height: int, text: str, font_path: str, max_font: Optional[int] = None, wrap: bool = True
+) -> Tuple[int, str]:
     """
     Optimize font size and word wrap for image
     :param image: PIL Image

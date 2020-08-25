@@ -3,7 +3,7 @@ from io import BytesIO
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
-from aiogram.types import InputFile, ContentType
+from aiogram.types import ContentType, InputFile
 
 from .access import AccessMiddleware
 from .access import public as public_command
@@ -22,8 +22,10 @@ async def start(message: types.Message, state: FSMContext):
         proxy.pop("background")
         proxy.pop("text")
 
-    await message.answer("Привет. Это бот для создания шаблонных цитат с логотипом Гражданского Общества. "
-                         "Отправь /templates чтобы получить список шаблонов")
+    await message.answer(
+        "Привет. Это бот для создания шаблонных цитат с логотипом Гражданского Общества. "
+        "Отправь /templates чтобы получить список шаблонов"
+    )
 
 
 @dp.message_handler(commands=["templates"])
