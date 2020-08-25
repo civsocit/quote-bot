@@ -14,13 +14,24 @@ class Align(Enum):
     center = enum_auto()
 
 
-def process_text(pil_image, text: str, color: Tuple[int, int, int]) -> bytes:
+def compile_image(pil_image) -> bytes:
+    """
+    Convert Pillow image to telegram image
+    """
+    # Convert to bytes
+    with io.BytesIO() as output:
+        pil_image.save(output, format="PNG")
+        png = output.getvalue()
+    return png
+
+
+def process_text(pil_image, text: str, color: Tuple[int, int, int]):
     """
     Add text and caption on Pillow image
     :param pil_image: Pillow image
     :param text: text to add
     :param color: text color RGB
-    :return: PNG Image (bytes)
+    :return: PIL Image
     """
     if "@" in text:
         text, caption = text.split("@", 2)
@@ -35,12 +46,7 @@ def process_text(pil_image, text: str, color: Tuple[int, int, int]) -> bytes:
         pil_image = add_text_on_image(pil_image, caption, color, DesignerSettings.caption_text_position(),
                                       align=Align.left)
 
-    # Convert to bytes
-    with io.BytesIO() as output:
-        pil_image.save(output, format="PNG")
-        png = output.getvalue()
-
-    return png
+    return pil_image
 
 
 def add_text_on_image(pil_image, text: str, color: Tuple[int, int, int], position: Tuple[float, float, float, float],

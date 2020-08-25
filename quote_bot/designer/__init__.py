@@ -1,3 +1,3 @@
-from .designer import process_text
+from .designer import add_text_on_image, Align, compile_image
 
-__all__ = ["process_text"]
+__all__ = ["add_text_on_image", "Align", "compile_image"]

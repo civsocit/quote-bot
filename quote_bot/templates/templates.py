@@ -5,11 +5,11 @@ from io import BytesIO
 from os.path import dirname
 from os.path import join as join_path
 from os.path import realpath
-from typing import Dict
+from typing import Dict, Optional
 
 from PIL import Image
 
-from quote_bot.designer import process_text
+from quote_bot.designer import add_text_on_image, Align, compile_image
 from quote_bot.settings import DesignerSettings
 
 
@@ -48,6 +48,10 @@ class Template:
         return copy(self._pil_image)
 
     @property
+    def size(self):
+        return self._pil_image.size
+
+    @property
     def preview(self) -> bytes:
         return copy(self._png_preview)
 
@@ -75,6 +79,26 @@ class TemplatesManager:
     def all_templates(self) -> Dict[str, Template]:
         return self._templates
 
-    def process_template(self, identifier: str, text: str) -> bytes:
+    def process_template(self, identifier: str, text: str, background: Optional[BytesIO] = None) -> bytes:
         template = self._templates[identifier]
-        return process_text(template.pil_image, text, template.text_color)
+
+        if "@" in text:
+            text, caption = text.split("@", 2)
+        else:
+            caption = ""
+        text = text.strip()
+        caption = caption.strip()
+
+        pil_image = add_text_on_image(template.pil_image, text, template.text_color, DesignerSettings.text_position())
+
+        if caption:
+            pil_image = add_text_on_image(pil_image, caption, template.text_color,
+                                          DesignerSettings.caption_text_position(),
+                                          align=Align.left)
+
+        if background:
+            background_pil = Image.open(background)
+            background_pil.paste(pil_image, (0, 0), pil_image)
+            pil_image = background_pil
+
+        return compile_image(pil_image)

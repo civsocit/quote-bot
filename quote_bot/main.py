@@ -3,7 +3,7 @@ from io import BytesIO
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
-from aiogram.types import InputFile
+from aiogram.types import InputFile, ContentType
 
 from .access import AccessMiddleware
 from .access import public as public_command
@@ -18,21 +18,17 @@ templates_manager = TemplatesManager()
 @dp.message_handler(commands=["start"])
 async def start(message: types.Message, state: FSMContext):
     async with state.proxy() as proxy:
-        proxy.pop("template", None)  # Reset current user template
+        proxy.pop("template")  # Reset current user template
+        proxy.pop("background")
+        proxy.pop("text")
 
-    await message.answer(
-        "Привет. Это бот для создания шаблонных постеров Гражданского Общества. Отправь /templates "
-        "чтобы получить список шаблонов"
-    )
+    await message.answer("Привет. Это бот для создания шаблонных цитат с логотипом Гражданского Общества. "
+                         "Отправь /templates чтобы получить список шаблонов")
 
 
 @dp.message_handler(commands=["templates"])
 async def templates_list(message: types.Message):
     templates = templates_manager.all_templates()
-
-    if not templates:
-        await message.answer("В базе нет ни одного шаблона. Администратор может добавить шаблон командой /add")
-        return
 
     for name, template in templates.items():
         keyboard = types.InlineKeyboardMarkup()
@@ -55,17 +51,36 @@ async def get_chat_id(message: types.Message):
 async def process_text(message: types.Message, state: FSMContext):
     async with state.proxy() as proxy:
         template = proxy.get("template", None)
-        if not template:
+        if not template or template not in templates_manager.all_templates():
             await message.answer("Сначала выберите шаблон в меню /templates")
-        elif template not in templates_manager.all_templates():
-            await message.answer(
-                "Такого шаблона больше нет в списке шаблонов. Выберите другой шаблон из списка /templates"
-            )
         else:
+            proxy["text"] = message.text
             await message.answer("Рисую плакат, ждите ... (до ~15 секунд)")
-            png = templates_manager.process_template(template, message.text)
+            png = templates_manager.process_template(template, message.text, proxy.get("background"))
             await message.answer_photo(png)
             await message.answer_document(InputFile(BytesIO(png), filename=f"{template}_poster.png"))
+
+
+@dp.message_handler(content_types=[ContentType.DOCUMENT])
+async def process_image(message: types.Message, state: FSMContext):
+    async with state.proxy() as proxy:
+        template = proxy.get("template")
+        if not template or template not in templates_manager.all_templates():
+            await message.answer("Сначала выберите шаблон в меню /templates")
+            return
+        if "image" not in message.document.mime_type:
+            await message.answer("Это не изображение")
+            return
+        file = BytesIO()
+        await message.document.download(file)
+        proxy["background"] = file
+        if not proxy.get("text"):
+            await message.answer("Фон загружен. Теперь отправьте текст для цитаты.")
+            return
+        await message.answer("Рисую плакат, ждите ... (до ~15 секунд)")
+        png = templates_manager.process_template(template, proxy["text"], proxy["background"])
+        await message.answer_photo(png)
+        await message.answer_document(InputFile(BytesIO(png), filename=f"{template}_poster.png"))
 
 
 @dp.callback_query_handler()
@@ -77,11 +92,14 @@ async def process_callback(callback_query: types.CallbackQuery, state: FSMContex
         return
     await bot.send_message(
         callback_query.from_user.id,
-        f"Выбран шаблон {template}, теперь отправьте текст для плаката."
+        f"Выбран шаблон {template}, теперь отправьте текст для плаката. Вы также можете отправить картинку на фон "
+        f"плаката размером {templates_manager.all_templates()[template].pil_image.size}"
         f"\n\nЧтобы вернуться к списку шаблонов отправьте /templates",
     )
     async with state.proxy() as proxy:
         proxy["template"] = template
+        proxy.pop("background")
+        proxy.pop("text")
 
 
 def main():
