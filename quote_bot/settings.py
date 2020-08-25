@@ -44,6 +44,10 @@ class DesignerSettings:
         return 0.09375, 0.27777, 0.90625, 0.72222
 
     @classmethod
+    def caption_text_position(cls) -> Tuple[float, float, float, float]:
+        return 0.5/16, 0.5/9, 6/16, 1/9
+
+    @classmethod
     def default_width(cls) -> int:
         # A3 size 16.54 inh with 200 DPI
         # Warning: Pillow uses discrete scale factor, so, 150 or 170 DPI may be equal
@@ -56,4 +60,4 @@ class DesignerSettings:
 
     @classmethod
     def max_font_size(cls) -> int:
-        return 200
+        return 150

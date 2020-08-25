@@ -1,3 +1,3 @@
-from .designer import add_text_on_image
+from .designer import process_text
 
-__all__ = ["add_text_on_image"]
+__all__ = ["process_text"]

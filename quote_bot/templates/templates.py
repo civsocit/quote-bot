@@ -2,16 +2,14 @@ from copy import copy
 from enum import Enum
 from enum import auto as enum_auto
 from io import BytesIO
-from math import ceil
-from os import listdir
 from os.path import dirname
 from os.path import join as join_path
 from os.path import realpath
-from typing import Dict, Iterable, Tuple
+from typing import Dict
 
 from PIL import Image
 
-from quote_bot.designer import add_text_on_image
+from quote_bot.designer import process_text
 from quote_bot.settings import DesignerSettings
 
 
@@ -79,4 +77,4 @@ class TemplatesManager:
 
     def process_template(self, identifier: str, text: str) -> bytes:
         template = self._templates[identifier]
-        return add_text_on_image(template.pil_image, text, template.text_color)
+        return process_text(template.pil_image, text, template.text_color)
