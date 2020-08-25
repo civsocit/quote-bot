@@ -1,6 +1,6 @@
 import textwrap
 from functools import lru_cache
-from typing import Tuple
+from typing import Optional, Tuple
 
 import numpy as np
 from PIL import ImageDraw, ImageFont
@@ -29,7 +29,14 @@ def _wrap_word(text: str, w: int) -> str:
 
 @lru_cache()
 def _target(
-    font_size: int, max_text_len: int, max_width: int, max_height: int, text: str, path_to_font: str, drawer
+    font_size: int,
+    max_text_len: int,
+    max_width: int,
+    max_height: int,
+    text: str,
+    path_to_font: str,
+    drawer,
+    max_font: Optional[int] = None,
 ) -> int:
     """
     Minimize me!
@@ -47,10 +54,15 @@ def _target(
         # Font is TOO big: minimize
         return max(text_width - max_width, 0) + max(text_height - max_height, 0)
 
+    if max_font and font_size > max_font:
+        return (max_font - font_size) ** 2
+
     return -font_size  # Font size must be biggest
 
 
-def optimize_font_size(image, max_width: int, max_height: int, text: str, font_path: str) -> Tuple[int, str]:
+def optimize_font_size(
+    image, max_width: int, max_height: int, text: str, font_path: str, max_font: Optional[int] = None
+) -> Tuple[int, str]:
     """
     Optimize font size and word wrap for image
     :param image: PIL Image
@@ -58,6 +70,7 @@ def optimize_font_size(image, max_width: int, max_height: int, text: str, font_p
     :param max_height: maximum text height in px
     :param text: text
     :param font_path: path to .ttf font file
+    :param max_font: maximum font size
     :return: Tuple[font size, wrapped text (with \n symbols)]
     """
     draw = ImageDraw.Draw(image)
@@ -70,15 +83,15 @@ def optimize_font_size(image, max_width: int, max_height: int, text: str, font_p
         """
         font_size, max_text_len = _vec_to_val(x)
 
-        res = _target(font_size, max_text_len, max_width, max_height, text, font_path, draw)
+        res = _target(font_size, max_text_len, max_width, max_height, text, font_path, draw, max_font)
         return res
 
     # x[0] - font size, x[1] - word wrap max phrase length
     # For better optimization, try different initial values
     best = min(
-        minimize(target, np.array([1, 5]), method="powell"),
-        minimize(target, np.array([1, 15]), method="powell"),
-        minimize(target, np.array([1, 25]), method="powell"),
+        minimize(target, np.array([1.0, 5.0]), method="powell"),
+        minimize(target, np.array([1.0, 15.0]), method="powell"),
+        minimize(target, np.array([1.0, 25.0]), method="powell"),
         key=lambda x: x.fun,
     )
     font_size, max_text_len = _vec_to_val(best.x)

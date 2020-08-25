@@ -7,7 +7,6 @@ from aiogram.types import InputFile
 
 from .access import AccessMiddleware
 from .access import public as public_command
-from .access import root_only
 from .settings import BotSettings
 from .templates import TemplatesManager
 
@@ -41,33 +40,6 @@ async def templates_list(message: types.Message):
         await message.answer_photo(template.preview, reply_markup=keyboard)
 
 
-@dp.message_handler(commands=["add"])
-@root_only()
-async def add_template(message: types.Message):
-    await message.answer(
-        f"Окей, отправь мне файл {templates_manager.template_format}. В описании к файлу можно "
-        f"указать имя шаблона. По-умолчанию имя файла будет именем шаблона."
-    )
-
-
-@dp.message_handler(commands=["remove"])
-@root_only()
-async def remove_template(message: types.Message, state: FSMContext):
-    async with state.proxy() as proxy:
-        template = proxy.get("template", None)
-        if not template:
-            await message.answer("Сначала выберите шаблон в меню /templates")
-        elif template not in templates_manager.all_templates():
-            await message.answer(
-                "Такого шаблона больше нет в списке шаблонов. Выберите другой шаблон из списка /templates"
-            )
-        else:
-            # TODO: 'Are you sure?' question should be here
-            templates_manager.remove_template(template)
-            proxy.pop("template", None)  # Reset current user template
-            await message.answer("Шаблон удалён")
-
-
 @dp.message_handler(commands=["chat_id"])
 @public_command()  # Everyone can call
 async def get_chat_id(message: types.Message):
@@ -77,26 +49,6 @@ async def get_chat_id(message: types.Message):
     :return:
     """
     await message.answer(message.chat.id)
-
-
-@dp.message_handler(content_types=[types.ContentType.DOCUMENT])
-@root_only()
-async def receive_file(message: types.Message, state: FSMContext):
-    name = message.document.file_name
-    if not name.endswith(templates_manager.template_format):
-        await message.answer(f"Принимаются только файлы {templates_manager.template_format}")
-        return
-
-    if message.caption:
-        caption = message.caption.strip().lower().replace("\n", "_").replace(" ", "_")
-        if not caption.endswith(templates_manager.template_format):
-            caption += templates_manager.template_format
-            name = caption
-
-    if await templates_manager.add_template(message.document, name):
-        await message.answer("Шаблон добавлен")
-    else:
-        await message.answer("Ошибка при чтении файла; попробуйте другой файл")
 
 
 @dp.message_handler(content_types=["text"])

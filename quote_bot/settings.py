@@ -15,10 +15,6 @@ class BotSettings:
         return token
 
     @classmethod
-    def templates_refresh_time(cls) -> int:
-        return 120  # in seconds
-
-    @classmethod
     def access_chat_id(cls) -> int:
         return -424580045
 
@@ -30,31 +26,22 @@ class BotSettings:
 class DesignerSettings:
     @classmethod
     def path_to_font(cls) -> str:
-        # TODO: load font from backend
         from os.path import abspath, dirname, join
 
         return join(abspath(dirname(__file__)), "designer", "main.ttf")
 
     @classmethod
     def text_color_light(cls) -> Tuple[int, int, int]:
-        # TODO: read that parameter from backend
         return 0xE1, 0xE6, 0xEB
 
     @classmethod
     def text_color_dark(cls) -> Tuple[int, int, int]:
-        # TODO: read that parameter from backend
         return 0x19, 0x2D, 0x44
 
     @classmethod
-    def text_brightness_threshold(cls) -> float:
-        # TODO: read that parameter from backend
-        return 0.7  # Dark text will appear on the image with a brightness level greater than 0.7
-
-    @classmethod
     def text_position(cls) -> Tuple[float, float, float, float]:
-        # TODO: read that parameter from backend
         # Relative position x0, y0, x1, y1
-        return 0.088, 0.250, 0.912, 0.625
+        return 0.09375, 0.27777, 0.90625, 0.72222
 
     @classmethod
     def default_width(cls) -> int:
@@ -66,3 +53,7 @@ class DesignerSettings:
     def default_preview_width(cls) -> int:
         # A7 size 4.13 inh with 150 DPI
         return 620
+
+    @classmethod
+    def max_font_size(cls) -> int:
+        return 400
