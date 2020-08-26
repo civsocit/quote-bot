@@ -90,7 +90,7 @@ class TemplatesManager:
         template = self._templates[identifier]
 
         if "@" in text:
-            text, caption = text.split("@", 2)
+            text, caption = text.split("@", maxsplit=1)
         else:
             caption = ""
         text = text.strip()
