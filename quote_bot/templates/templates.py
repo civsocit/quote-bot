@@ -9,7 +9,7 @@ from typing import Dict, Optional, Tuple
 
 from PIL import Image
 
-from quote_bot.designer import Align, add_text_on_image, compile_image, add_background_on_image, fill_color
+from quote_bot.designer import Align, add_background_on_image, add_text_on_image, compile_image, fill_color
 from quote_bot.settings import DesignerSettings
 
 
@@ -66,7 +66,7 @@ class Template:
     def background_color(self) -> Tuple[int, int, int]:
         return {
             TemplateType.black: DesignerSettings.background_color_dark(),
-            TemplateType.white: DesignerSettings.background_color_light()
+            TemplateType.white: DesignerSettings.background_color_light(),
         }[self._type]
 
 

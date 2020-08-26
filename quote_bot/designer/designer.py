@@ -2,11 +2,9 @@ import io
 from enum import Enum
 from enum import auto as enum_auto
 from typing import Tuple
+
+from PIL import Image, ImageDraw, ImageFont
 from resizeimage.resizeimage import resize_crop
-
-from io import BytesIO
-
-from PIL import ImageDraw, ImageFont, Image
 
 from ..optimizator import optimize_font_size
 from ..settings import DesignerSettings
