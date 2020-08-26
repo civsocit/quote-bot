@@ -56,7 +56,7 @@ class DesignerSettings:
 
     @classmethod
     def caption_text_position(cls) -> Tuple[float, float, float, float]:
-        return 0.5 / 16, 0.5 / 9, 6 / 16, 1 / 9
+        return 0.5 / 16, 0.4 / 9, 6 / 16, 1 / 9
 
     @classmethod
     def default_width(cls) -> int:
