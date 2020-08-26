@@ -5,11 +5,11 @@ from io import BytesIO
 from os.path import dirname
 from os.path import join as join_path
 from os.path import realpath
-from typing import Dict, Optional
+from typing import Dict, Optional, Tuple
 
 from PIL import Image
 
-from quote_bot.designer import Align, add_text_on_image, compile_image, add_background_on_image
+from quote_bot.designer import Align, add_text_on_image, compile_image, add_background_on_image, fill_color
 from quote_bot.settings import DesignerSettings
 
 
@@ -56,10 +56,17 @@ class Template:
         return copy(self._png_preview)
 
     @property
-    def text_color(self):
+    def text_color(self) -> Tuple[int, int, int]:
         return {
             TemplateType.black: DesignerSettings.text_color_light(),
             TemplateType.white: DesignerSettings.text_color_dark(),
+        }[self._type]
+
+    @property
+    def background_color(self) -> Tuple[int, int, int]:
+        return {
+            TemplateType.black: DesignerSettings.background_color_dark(),
+            TemplateType.white: DesignerSettings.background_color_light()
         }[self._type]
 
 
@@ -97,6 +104,8 @@ class TemplatesManager:
             )
 
         if background:
-            pil_image = add_background_on_image(pil_image, background)
+            pil_image = add_background_on_image(pil_image, Image.open(background))
+        else:
+            pil_image = fill_color(pil_image, template.background_color)
 
         return compile_image(pil_image)

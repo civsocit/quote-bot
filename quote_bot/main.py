@@ -24,7 +24,7 @@ async def start(message: types.Message, state: FSMContext):
 
     await message.answer(
         "Привет. Это бот для создания шаблонных цитат с логотипом Гражданского Общества. "
-        "Отправь /templates чтобы получить список шаблонов"
+        "Отправь /templates чтобы получить список шаблонов цитат"
     )
 
 
@@ -85,6 +85,11 @@ async def process_image(message: types.Message, state: FSMContext):
         await message.answer_document(InputFile(BytesIO(png), filename=f"{template}_poster.png"))
 
 
+@dp.message_handler(content_types=[ContentType.PHOTO])
+async def process_photo(message: types.Message, state: FSMContext):
+    await message.answer("Отправьте это фото 'как файл' для лучшего качества")
+
+
 @dp.callback_query_handler()
 async def process_callback(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.answer_callback_query(callback_query.id)
@@ -92,11 +97,15 @@ async def process_callback(callback_query: types.CallbackQuery, state: FSMContex
     if template not in templates_manager.all_templates():
         await bot.send_message(callback_query.from_user.id, "Такого шаблона не существует")
         return
+
+    size = templates_manager.all_templates()[template].pil_image.size
     await bot.send_message(
         callback_query.from_user.id,
-        f"Выбран шаблон {template}, теперь отправьте текст для плаката. Вы также можете отправить картинку на фон "
-        f"плаката размером {templates_manager.all_templates()[template].pil_image.size}"
-        f"\n\nЧтобы вернуться к списку шаблонов отправьте /templates",
+        f"Выбран шаблон {template}, теперь отправьте текст для плаката.\n\n"
+        f"Чтобы указать автора цитаты, отправьте его имя после @ в формате 'Текст @ Автор'\n\n"
+        f"Вы также можете отправить картинку на фон "
+        f"плаката {size[0]}x{size[1]} (картинки других размеров будут растянуты/обрезаны)\n\n"
+        f"Чтобы вернуться к списку шаблонов отправьте /templates",
     )
     async with state.proxy() as proxy:
         proxy["template"] = template

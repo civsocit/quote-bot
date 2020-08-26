@@ -77,17 +77,27 @@ def _resize_to_max(req_size: Tuple[int, int], image):
     return image
 
 
-def add_background_on_image(pil_image, background: BytesIO):
+def add_background_on_image(pil_image, background_pil):
     """
     Add background on image
     :param pil_image: PIL Image
-    :param background: background to add (bytes)
+    :param background_pil: background to add PIL Image
     :return: PIL Image
     """
-    background_pil = Image.open(background)
     background_pil = _resize_to_max(pil_image.size, background_pil)
     background_pil = resize_crop(background_pil, pil_image.size)
 
     background_pil.paste(pil_image, (0, 0), pil_image)
 
     return background_pil
+
+
+def fill_color(pil_image, color: Tuple[int, int, int]):
+    """
+    Add color on background
+    :param pil_image: PIL Image
+    :param color: color
+    :return: PIL Image
+    """
+    background = Image.new("RGB", (pil_image.width, pil_image.height), color)
+    return add_background_on_image(pil_image, background)

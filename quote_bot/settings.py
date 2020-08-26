@@ -39,6 +39,14 @@ class DesignerSettings:
         return 0x19, 0x2D, 0x44
 
     @classmethod
+    def background_color_dark(cls) -> Tuple[int, int, int]:
+        return 0x00, 0x00, 0x00
+
+    @classmethod
+    def background_color_light(cls) -> Tuple[int, int, int]:
+        return 0xE1, 0xE6, 0xEB
+
+    @classmethod
     def text_position(cls) -> Tuple[float, float, float, float]:
         # Relative position x0, y0, x1, y1
         return 0.09375, 0.27777, 0.90625, 0.72222
