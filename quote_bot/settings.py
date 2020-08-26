@@ -1,4 +1,5 @@
 import os
+from os.path import abspath, dirname, join
 from typing import Tuple
 
 from dotenv import load_dotenv
@@ -26,9 +27,11 @@ class BotSettings:
 class DesignerSettings:
     @classmethod
     def path_to_font(cls) -> str:
-        from os.path import abspath, dirname, join
+        return join(abspath(dirname(__file__)), "designer", "Montserrat-Bold.ttf")
 
-        return join(abspath(dirname(__file__)), "designer", "main.ttf")
+    @classmethod
+    def path_to_caption_font(cls) -> str:
+        return join(abspath(dirname(__file__)), "designer", "Montserrat-ExtraBold.ttf")
 
     @classmethod
     def text_color_light(cls) -> Tuple[int, int, int]:
@@ -49,7 +52,7 @@ class DesignerSettings:
     @classmethod
     def text_position(cls) -> Tuple[float, float, float, float]:
         # Relative position x0, y0, x1, y1
-        return 0.09375, 0.27777, 0.90625, 0.72222
+        return 0.09375, 0.25555, 0.90625, 0.72222
 
     @classmethod
     def caption_text_position(cls) -> Tuple[float, float, float, float]:

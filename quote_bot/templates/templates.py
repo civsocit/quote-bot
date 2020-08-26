@@ -96,11 +96,22 @@ class TemplatesManager:
         text = text.strip()
         caption = caption.strip()
 
-        pil_image = add_text_on_image(template.pil_image, text, template.text_color, DesignerSettings.text_position())
+        pil_image = add_text_on_image(
+            template.pil_image,
+            text,
+            template.text_color,
+            DesignerSettings.text_position(),
+            path_to_font=DesignerSettings.path_to_font(),
+        )
 
         if caption:
             pil_image = add_text_on_image(
-                pil_image, caption, template.text_color, DesignerSettings.caption_text_position(), align=Align.left
+                pil_image,
+                caption,
+                template.text_color,
+                DesignerSettings.caption_text_position(),
+                align=Align.left,
+                path_to_font=DesignerSettings.path_to_caption_font(),
             )
 
         if background:
