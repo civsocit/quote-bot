@@ -2,8 +2,11 @@ import io
 from enum import Enum
 from enum import auto as enum_auto
 from typing import Tuple
+from resizeimage.resizeimage import resize_crop
 
-from PIL import ImageDraw, ImageFont
+from io import BytesIO
+
+from PIL import ImageDraw, ImageFont, Image
 
 from ..optimizator import optimize_font_size
 from ..settings import DesignerSettings
@@ -23,31 +26,6 @@ def compile_image(pil_image) -> bytes:
         pil_image.save(output, format="PNG")
         png = output.getvalue()
     return png
-
-
-def process_text(pil_image, text: str, color: Tuple[int, int, int]):
-    """
-    Add text and caption on Pillow image
-    :param pil_image: Pillow image
-    :param text: text to add
-    :param color: text color RGB
-    :return: PIL Image
-    """
-    if "@" in text:
-        text, caption = text.split("@", 2)
-    else:
-        caption = ""
-    text = text.strip()
-    caption = caption.strip()
-
-    pil_image = add_text_on_image(pil_image, text, color, DesignerSettings.text_position())
-
-    if caption:
-        pil_image = add_text_on_image(
-            pil_image, caption, color, DesignerSettings.caption_text_position(), align=Align.left
-        )
-
-    return pil_image
 
 
 def add_text_on_image(
@@ -89,3 +67,27 @@ def add_text_on_image(
     draw.text(position, wrapped_text, color, font=font, align=align.name)
 
     return pil_image
+
+
+def _resize_to_max(req_size: Tuple[int, int], image):
+    if req_size[0] > image.size[0]:
+        image = image.resize((req_size[0], int(req_size[0] / image.size[0] * image.size[1])))
+    if req_size[1] > image.size[1]:
+        image = image.resize((int(req_size[1] / image.size[1] * image.size[0]), req_size[1]))
+    return image
+
+
+def add_background_on_image(pil_image, background: BytesIO):
+    """
+    Add background on image
+    :param pil_image: PIL Image
+    :param background: background to add (bytes)
+    :return: PIL Image
+    """
+    background_pil = Image.open(background)
+    background_pil = _resize_to_max(pil_image.size, background_pil)
+    background_pil = resize_crop(background_pil, pil_image.size)
+
+    background_pil.paste(pil_image, (0, 0), pil_image)
+
+    return background_pil

@@ -9,7 +9,7 @@ from typing import Dict, Optional
 
 from PIL import Image
 
-from quote_bot.designer import Align, add_text_on_image, compile_image
+from quote_bot.designer import Align, add_text_on_image, compile_image, add_background_on_image
 from quote_bot.settings import DesignerSettings
 
 
@@ -97,8 +97,6 @@ class TemplatesManager:
             )
 
         if background:
-            background_pil = Image.open(background)
-            background_pil.paste(pil_image, (0, 0), pil_image)
-            pil_image = background_pil
+            pil_image = add_background_on_image(pil_image, background)
 
         return compile_image(pil_image)
