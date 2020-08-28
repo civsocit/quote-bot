@@ -1,3 +1,4 @@
+from asyncio import get_event_loop
 from io import BytesIO
 
 from aiogram import Bot, Dispatcher, executor, types
@@ -10,12 +11,9 @@ from .access import public as public_command
 from .settings import BotSettings
 from .templates import TemplatesManager
 
-bot = Bot(token=BotSettings.token())
-dp = Dispatcher(bot, storage=MemoryStorage())
 templates_manager = TemplatesManager()
 
 
-@dp.message_handler(commands=["start"])
 async def start(message: types.Message, state: FSMContext):
     async with state.proxy() as proxy:
         proxy.pop("template")  # Reset current user template
@@ -28,7 +26,6 @@ async def start(message: types.Message, state: FSMContext):
     )
 
 
-@dp.message_handler(commands=["templates"])
 async def templates_list(message: types.Message):
     templates = templates_manager.all_templates()
 
@@ -38,7 +35,6 @@ async def templates_list(message: types.Message):
         await message.answer_photo(template.preview, reply_markup=keyboard)
 
 
-@dp.message_handler(commands=["chat_id"])
 @public_command()  # Everyone can call
 async def get_chat_id(message: types.Message):
     """
@@ -49,7 +45,6 @@ async def get_chat_id(message: types.Message):
     await message.answer(message.chat.id)
 
 
-@dp.message_handler(content_types=["text"])
 async def process_text(message: types.Message, state: FSMContext):
     async with state.proxy() as proxy:
         template = proxy.get("template", None)
@@ -63,7 +58,6 @@ async def process_text(message: types.Message, state: FSMContext):
             await message.answer_document(InputFile(BytesIO(png), filename=f"{template}_poster.png"))
 
 
-@dp.message_handler(content_types=[ContentType.DOCUMENT])
 async def process_image(message: types.Message, state: FSMContext):
     async with state.proxy() as proxy:
         template = proxy.get("template")
@@ -85,13 +79,12 @@ async def process_image(message: types.Message, state: FSMContext):
         await message.answer_document(InputFile(BytesIO(png), filename=f"{template}_poster.png"))
 
 
-@dp.message_handler(content_types=[ContentType.PHOTO])
 async def process_photo(message: types.Message, state: FSMContext):
     await message.answer("Отправьте это фото 'как файл' для лучшего качества")
 
 
-@dp.callback_query_handler()
 async def process_callback(callback_query: types.CallbackQuery, state: FSMContext):
+    bot = Bot.get_current()
     await bot.answer_callback_query(callback_query.id)
     template = callback_query.data
     if template not in templates_manager.all_templates():
@@ -113,7 +106,56 @@ async def process_callback(callback_query: types.CallbackQuery, state: FSMContex
         proxy.pop("text")
 
 
-def main():
+# AWS Lambda funcs
+async def register_handlers(dp: Dispatcher):
+    """Registration all handlers before processing update."""
+
+    dp.register_message_handler(start, commands=["start"])
+    dp.register_message_handler(templates_list, commands=["templates"])
+    dp.register_message_handler(get_chat_id, commands=["chat_id"])
+    dp.register_message_handler(process_text, content_types=["text"])
+    dp.register_callback_query_handler(process_callback)
+    dp.register_message_handler(process_photo, content_types=[ContentType.PHOTO])
+    dp.register_message_handler(process_image, content_types=[ContentType.DOCUMENT])
+
     dp.middleware.setup(AccessMiddleware(BotSettings.access_chat_id()))
-    dp.loop.run_until_complete(templates_manager.update_templates())
+
+
+async def process_event(event, dp: Dispatcher):
+    """
+    Converting an AWS Lambda event to an update and handling that
+    update.
+    """
+
+    Bot.set_current(dp.bot)
+    update = types.Update.to_object(event)
+    await dp.process_update(update)
+
+
+async def aws_main(event):
+    """
+    Asynchronous wrapper for initializing the bot and dispatcher,
+    and launching subsequent functions.
+    """
+
+    # Bot and dispatcher initialization
+    bot = Bot(BotSettings.token())
+    dp = Dispatcher(bot, storage=MemoryStorage())
+
+    await register_handlers(dp)
+    await process_event(event, dp)
+
+    return "ok"
+
+
+def lambda_handler(event, context):
+    """AWS Lambda handler."""
+
+    return get_event_loop().run_until_complete(aws_main(event))
+
+
+def main():
+    bot = Bot(BotSettings.token())
+    dp = Dispatcher(bot, storage=MemoryStorage())
+    get_event_loop().run_until_complete((register_handlers(dp)))
     executor.start_polling(dp, skip_updates=True)

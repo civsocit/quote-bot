@@ -75,9 +75,6 @@ class TemplatesManager:
     template_format: str = ".png"
 
     def __init__(self):
-        self._templates = dict()
-
-    async def update_templates(self):
         self._templates = {
             "black": Template(join_path(self._path_to_templates, "Quot-bot-285.png"), TemplateType.black),
             "white": Template(join_path(self._path_to_templates, "Quot-bot-185.png"), TemplateType.white),
