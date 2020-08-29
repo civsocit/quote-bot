@@ -1,10 +1,16 @@
+# Build layer
+rm aws-layer.zip
+docker rmi aws -f
+docker build -t aws .
+id=$(docker create aws:latest)
+docker cp $id:/app/aws.zip aws-layer.zip
+
+# Build lambda
 rm -rf aws
 rm aws.zip
-python -m pip install -r aws_requirements.txt --target aws
+mkdir aws
 cp -r quote_bot aws/
 cp lambda_function.py aws/
-
 cd aws
-zip -9 -r aws.zip .
+zip -r ../aws.zip .
 cd ..
-mv aws/aws.zip .
