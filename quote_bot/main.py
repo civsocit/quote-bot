@@ -6,10 +6,10 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
 from aiogram.types import ContentType, InputFile
 
-from .access import AccessMiddleware
-from .access import public as public_command
-from .settings import BotSettings
-from .templates import TemplatesManager
+from quote_bot.access import AccessMiddleware
+from quote_bot.access import public as public_command
+from quote_bot.settings import BotSettings
+from quote_bot.templates import TemplatesManager
 
 templates_manager = TemplatesManager()
 
@@ -140,7 +140,7 @@ async def aws_main(event):
 
     # Bot and dispatcher initialization
     bot = Bot(BotSettings.token())
-    dp = Dispatcher(bot, storage=MemoryStorage())
+    dp = Dispatcher(bot, storage=MemoryStorage())  # TODO: DynamoDB
 
     await register_handlers(dp)
     await process_event(event, dp)
@@ -159,3 +159,7 @@ def main():
     dp = Dispatcher(bot, storage=MemoryStorage())
     get_event_loop().run_until_complete((register_handlers(dp)))
     executor.start_polling(dp, skip_updates=True)
+
+
+if __name__ == '__main__':
+    main()

@@ -1,0 +1,8 @@
+aiogram
+python-dotenv
+Pillow
+aiocache
+python-resize-image
+
+#numpy
+#scipy
