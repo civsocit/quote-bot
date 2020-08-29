@@ -33,3 +33,17 @@ TOKEN="Ваш токен Telegram"
     def access_chat_id(cls) -> int:
         return -1001306836357  # Идентификатор чата
 ```
+
+## Разворачивание на AWS (для разработчиков)
+
+TODO: нормальная инструкция
+
+Помощь:
+https://github.com/DavisDmitry/aiogram-aws-serverless-example
+https://github.com/marcmetz/How-To-Create-AWS-Lambda-Function-with-Docker
+
+Для работы на AWS нужны Layout (слой с пакетами) и собственно бот. За сборку этих двух отвечает скрипт build_aws.sh
+Его нужно запускать от root, потому что внутри себя он использует Docker
+Архив aws-layout нужно поместить в облако и создать из него Python3.7 layout
+Архив aws нужно поместить в lambda, добавить созданный aws layout
+Прочие настройки из инструкции выше
