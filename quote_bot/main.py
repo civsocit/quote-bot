@@ -1,6 +1,7 @@
 from asyncio import get_event_loop
 from io import BytesIO
 
+import boto3
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
@@ -8,6 +9,7 @@ from aiogram.types import ContentType, InputFile
 
 from quote_bot.access import AccessMiddleware
 from quote_bot.access import public as public_command
+from quote_bot.dynamo import DynamoStorage
 from quote_bot.settings import BotSettings
 from quote_bot.templates import TemplatesManager
 from quote_bot.utils import download_file
@@ -145,7 +147,9 @@ async def aws_main(event):
 
     # Bot and dispatcher initialization
     bot = Bot(BotSettings.token())
-    dp = Dispatcher(bot, storage=MemoryStorage())  # TODO: DynamoDB
+
+    dynamodb = boto3.resource("dynamodb", region_name="us-east-1")
+    dp = Dispatcher(bot, storage=DynamoStorage(dynamodb))
 
     await register_handlers(dp)
     await process_event(event, dp)
