@@ -17,7 +17,7 @@ class BotSettings:
 
     @classmethod
     def access_chat_id(cls) -> int:
-        return -424580045
+        return -1001306836357
 
     @classmethod
     def access_cache_ttl(cls) -> int:
