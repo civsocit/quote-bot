@@ -24,8 +24,9 @@ async def start(message: types.Message, state: FSMContext):
         proxy.pop("text")
 
     await message.answer(
-        "Привет. Это бот для создания шаблонных цитат с логотипом Гражданского Общества. "
-        "Отправь /templates чтобы получить список шаблонов цитат"
+        "Привет. Я бот для создания шаблонных цитат с логотипом Гражданского Общества. "
+        "Отправь /templates чтобы получить список шаблонов цитат\n\n"
+        "Я работаю на AWS. Я медленный, но надёжный"
     )
 
 
@@ -55,7 +56,7 @@ async def process_text(message: types.Message, state: FSMContext):
             await message.answer("Сначала выберите шаблон в меню /templates")
         else:
             proxy["text"] = message.text
-            await message.answer("Рисую плакат, ждите ... (до ~15 секунд)")
+            await message.answer("Рисую плакат, ждите ... (до ~30 секунд)")
             background = await download_file(proxy.get("background"))
             png = templates_manager.process_template(template, message.text, background)
             await message.answer_photo(png)
@@ -79,7 +80,7 @@ async def process_image(message: types.Message, state: FSMContext):
             await message.answer("Фон загружен. Теперь отправьте текст для цитаты.")
             return
 
-        await message.answer("Рисую плакат, ждите ... (до ~15 секунд)")
+        await message.answer("Рисую плакат, ждите ... (до ~30 секунд)")
         background = await download_file(proxy["background"])
         png = templates_manager.process_template(template, proxy["text"], background)
         await message.answer_photo(png)
