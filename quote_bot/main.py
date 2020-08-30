@@ -10,6 +10,7 @@ from quote_bot.access import AccessMiddleware
 from quote_bot.access import public as public_command
 from quote_bot.settings import BotSettings
 from quote_bot.templates import TemplatesManager
+from quote_bot.utils import download_file
 
 templates_manager = TemplatesManager()
 
@@ -53,28 +54,32 @@ async def process_text(message: types.Message, state: FSMContext):
         else:
             proxy["text"] = message.text
             await message.answer("Рисую плакат, ждите ... (до ~15 секунд)")
-            png = templates_manager.process_template(template, message.text, proxy.get("background"))
+            background = await download_file(proxy.get("background"))
+            png = templates_manager.process_template(template, message.text, background)
             await message.answer_photo(png)
             await message.answer_document(InputFile(BytesIO(png), filename=f"{template}_poster.png"))
 
 
 async def process_image(message: types.Message, state: FSMContext):
+    if "image" not in message.document.mime_type:
+        await message.answer("Это не изображение")
+        return
+
     async with state.proxy() as proxy:
         template = proxy.get("template")
         if not template or template not in templates_manager.all_templates():
             await message.answer("Сначала выберите шаблон в меню /templates")
             return
-        if "image" not in message.document.mime_type:
-            await message.answer("Это не изображение")
-            return
-        file = BytesIO()
-        await message.document.download(file)
-        proxy["background"] = file
+
+        proxy["background"] = message.document.file_id
+
         if not proxy.get("text"):
             await message.answer("Фон загружен. Теперь отправьте текст для цитаты.")
             return
+
         await message.answer("Рисую плакат, ждите ... (до ~15 секунд)")
-        png = templates_manager.process_template(template, proxy["text"], proxy["background"])
+        background = await download_file(proxy["background"])
+        png = templates_manager.process_template(template, proxy["text"], background)
         await message.answer_photo(png)
         await message.answer_document(InputFile(BytesIO(png), filename=f"{template}_poster.png"))
 
@@ -161,5 +166,5 @@ def main():
     executor.start_polling(dp, skip_updates=True)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
