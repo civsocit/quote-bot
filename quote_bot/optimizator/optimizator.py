@@ -37,7 +37,6 @@ def _target(
     path_to_font: str,
     drawer,
     max_font: Optional[int] = None,
-    wrap: bool = True,
 ) -> int:
     """
     Minimize me!
@@ -46,7 +45,7 @@ def _target(
     :param drawer:
     :return:
     """
-    wrapped = _wrap_word(text, max_text_len) if wrap else text
+    wrapped = _wrap_word(text, max_text_len)
     font = ImageFont.truetype(path_to_font, font_size)
 
     text_width, text_height = drawer.textsize(wrapped, font)
@@ -62,7 +61,7 @@ def _target(
 
 
 def optimize_font_size(
-    max_width: int, max_height: int, text: str, font_path: str, max_font: Optional[int] = None, wrap: bool = True
+    max_width: int, max_height: int, text: str, font_path: str, max_font: Optional[int] = None
 ) -> Tuple[int, str]:
     """
     Optimize font size and word wrap for image
@@ -71,7 +70,6 @@ def optimize_font_size(
     :param text: text
     :param font_path: path to .ttf font file
     :param max_font: maximum font size
-    :param wrap: wrap words
     :return: Tuple[font size, wrapped text (with \n symbols)]
     """
     image = Image.new("1", (max_width + 1, max_height + 1))
@@ -85,19 +83,16 @@ def optimize_font_size(
         """
         font_size, max_text_len = _vec_to_val(x)
 
-        res = _target(font_size, max_text_len, max_width, max_height, text, font_path, draw, max_font, wrap)
+        res = _target(font_size, max_text_len, max_width, max_height, text, font_path, draw, max_font)
         return res
 
     # x[0] - font size, x[1] - word wrap max phrase length
     # For better optimization, try different initial values
-    if wrap:
-        best = min(
-            minimize(target, np.array([1.0, 5.0]), method="powell"),
-            minimize(target, np.array([1.0, 15.0]), method="powell"),
-            minimize(target, np.array([1.0, 25.0]), method="powell"),
-            key=lambda x: x.fun,
-        )
-    else:
-        best = minimize(target, np.array([1.0, 25.0]), method="powell")
+    best = min(
+        minimize(target, np.array([1.0, 5.0]), method="powell"),
+        minimize(target, np.array([1.0, 15.0]), method="powell"),
+        minimize(target, np.array([1.0, 25.0]), method="powell"),
+        key=lambda x: x.fun,
+    )
     font_size, max_text_len = _vec_to_val(best.x)
     return font_size, _wrap_word(text, max_text_len)

@@ -32,7 +32,6 @@ def add_text_on_image(
     color: Tuple[int, int, int],
     position: Tuple[float, float, float, float],
     path_to_font: str,
-    wrap: bool = True,
     align: Align = Align.center,
     fixed_font_size: Optional[int] = None,
 ):
@@ -55,7 +54,7 @@ def add_text_on_image(
 
     if not fixed_font_size:
         font_size, wrapped_text = optimize_font_size(
-            x1 - x0, y1 - y0, text, path_to_font, DesignerSettings.max_font_size(), wrap
+            x1 - x0, y1 - y0, text, path_to_font, DesignerSettings.max_font_size()
         )
     else:
         font_size, wrapped_text = fixed_font_size, text
