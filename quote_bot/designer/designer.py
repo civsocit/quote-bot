@@ -55,7 +55,7 @@ def add_text_on_image(
 
     if not fixed_font_size:
         font_size, wrapped_text = optimize_font_size(
-            pil_image, x1 - x0, y1 - y0, text, path_to_font, DesignerSettings.max_font_size(), wrap
+            x1 - x0, y1 - y0, text, path_to_font, DesignerSettings.max_font_size(), wrap
         )
     else:
         font_size, wrapped_text = fixed_font_size, text

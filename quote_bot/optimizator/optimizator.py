@@ -3,7 +3,7 @@ from functools import lru_cache
 from typing import Optional, Tuple
 
 import numpy as np
-from PIL import ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont
 from scipy.optimize import minimize
 
 
@@ -62,11 +62,10 @@ def _target(
 
 
 def optimize_font_size(
-    image, max_width: int, max_height: int, text: str, font_path: str, max_font: Optional[int] = None, wrap: bool = True
+    max_width: int, max_height: int, text: str, font_path: str, max_font: Optional[int] = None, wrap: bool = True
 ) -> Tuple[int, str]:
     """
     Optimize font size and word wrap for image
-    :param image: PIL Image
     :param max_width: maximum text width in px
     :param max_height: maximum text height in px
     :param text: text
@@ -75,6 +74,7 @@ def optimize_font_size(
     :param wrap: wrap words
     :return: Tuple[font size, wrapped text (with \n symbols)]
     """
+    image = Image.new("1", (max_width + 1, max_height + 1))
     draw = ImageDraw.Draw(image)
 
     def target(x):
