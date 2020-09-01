@@ -17,7 +17,10 @@ class BotSettings:
 
     @classmethod
     def access_chat_id(cls) -> int:
-        return -1001306836357
+        chat = os.getenv("CHAT")
+        if not chat:
+            raise ValueError("Access chat ID must be specified (missing .env file or CHAT environment variable?)")
+        return int(chat)
 
     @classmethod
     def access_cache_ttl(cls) -> int:
