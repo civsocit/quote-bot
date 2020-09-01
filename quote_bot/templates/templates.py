@@ -76,8 +76,8 @@ class TemplatesManager:
 
     def __init__(self):
         self._templates = {
-            "black": Template(join_path(self._path_to_templates, "Quot-bot-285.png"), TemplateType.black),
-            "white": Template(join_path(self._path_to_templates, "Quot-bot-185.png"), TemplateType.white),
+            "black": Template(join_path(self._path_to_templates, "black.png"), TemplateType.black),
+            "white": Template(join_path(self._path_to_templates, "white.png"), TemplateType.white),
         }
 
     def all_templates(self) -> Dict[str, Template]:
