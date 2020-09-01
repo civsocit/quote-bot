@@ -7,6 +7,10 @@ from aiogram import Bot
 
 @cached()
 async def download_file(file_id: Optional[str] = None) -> Optional[BytesIO]:
+    """
+    Download file from Telegram server by ID
+    Cached function
+    """
     if not file_id:
         return None
 

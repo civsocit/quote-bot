@@ -16,7 +16,7 @@ def _wrap_word(text: str, w: int) -> str:
 
 
 @lru_cache()
-def _target(
+def _font_target(
     font_size: int,
     max_width: int,
     max_height: int,
@@ -40,6 +40,7 @@ def _target(
         return 100000
 
     if max_font and font_size > max_font:
+        # Font is TOO big: minimize
         return 100000
 
     return -font_size  # Font size must be biggest
@@ -79,11 +80,12 @@ def _bisect(target: Callable[[int], int], start: int, end: int) -> int:
         direction = 1
     elif left_v > 0 and right_v < 0:
         direction = -1
+    elif left_v == 0 and right_v == 0:
+        return start
     else:
         raise ValueError("Function must change sign between start and end")
 
     while abs(left - right) > 1:
-        print(left, right)
         middle = left + int((right - left) / 2)
         val = target(middle)
         if sign(val) * direction > 0:
@@ -115,11 +117,15 @@ def optimize_font_size(
     font = ImageFont.truetype(font_path, 40)
 
     def wrap_target(x):
+        """
+        Minimize me!
+        :param x: max text line length
+        """
         res = _wrap_target(draw, max_width, max_height, text, font, x)
         return res
 
     # Optimize word wrapping
-    if text.count(" "):
+    if text.count(" "):  # We don't need hyphenation if here are no tabs
         wrap = _bisect(wrap_target, 1, 200)
     else:
         wrap = 1000
@@ -129,7 +135,7 @@ def optimize_font_size(
         Minimize me!
         :param x: font size
         """
-        res = _target(x, max_width, max_height, _wrap_word(text, wrap), font_path, draw, max_font)
+        res = _font_target(x, max_width, max_height, _wrap_word(text, wrap), font_path, draw, max_font)
         return res
 
     # Optimize font size

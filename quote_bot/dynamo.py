@@ -4,6 +4,9 @@ from aiogram.contrib.fsm_storage.memory import BaseStorage
 
 
 class DynamoStorage(BaseStorage):
+    """
+    DynamoBD wrapper for Aiogram Storage
+    """
 
     _table_name = "AiogramFSMTable"
 

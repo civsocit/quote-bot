@@ -26,6 +26,10 @@ class BotSettings:
     def access_cache_ttl(cls) -> int:
         return 60  # in seconds
 
+    @classmethod
+    def dynamo_region(cls) -> str:
+        return "us-east-1"
+
 
 class DesignerSettings:
     @classmethod
