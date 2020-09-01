@@ -1,5 +1,7 @@
 # Build layer
 rm aws-layer.zip
+rm aws_requirements.txt
+poetry export -f requirements.txt --without-hashes --output aws_requirements.txt
 docker rmi aws -f
 docker build -t aws .
 id=$(docker create aws:latest)
