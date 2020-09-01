@@ -1,20 +1,8 @@
 import textwrap
 from functools import lru_cache
-from typing import Optional, Tuple
+from typing import Callable, Optional, Tuple
 
-import numpy as np
 from PIL import Image, ImageDraw, ImageFont
-from scipy.optimize import minimize
-
-
-def _vec_to_val(x) -> Tuple[int, int]:
-    """
-    Convert optimizator x[...] vector to font size and word wrap max length
-    :param x: numpy array
-    :return: Tuple [font size, word wrap max length]
-    """
-    # +1 because x may be 0
-    return abs(int(x[0])) + 1, abs(int(x[1])) + 1
 
 
 def _wrap_word(text: str, w: int) -> str:
@@ -30,10 +18,9 @@ def _wrap_word(text: str, w: int) -> str:
 @lru_cache()
 def _target(
     font_size: int,
-    max_text_len: int,
     max_width: int,
     max_height: int,
-    text: str,
+    wrapped_text: str,
     path_to_font: str,
     drawer,
     max_font: Optional[int] = None,
@@ -41,23 +28,73 @@ def _target(
     """
     Minimize me!
     :param font_size:
-    :param max_text_len:
     :param drawer:
     :return:
     """
-    wrapped = _wrap_word(text, max_text_len)
     font = ImageFont.truetype(path_to_font, font_size)
 
-    text_width, text_height = drawer.textsize(wrapped, font)
+    text_width, text_height = drawer.textsize(wrapped_text, font)
 
     if text_width > max_width or text_height > max_height:
         # Font is TOO big: minimize
-        return max(text_width - max_width, 0) + max(text_height - max_height, 0)
+        return 100000
 
     if max_font and font_size > max_font:
-        return (max_font - font_size) ** 2
+        return 100000
 
     return -font_size  # Font size must be biggest
+
+
+@lru_cache()
+def _wrap_target(drawer, max_width: int, max_height: int, text: str, font, max_text_len: int):
+    """
+    Minimize me!
+    """
+    dim = max_width / max_height
+    wrapped = _wrap_word(text, max_text_len)
+    text_width, text_height = drawer.textsize(wrapped, font)
+    real_dim = text_width / text_height
+
+    return real_dim - dim
+
+
+def sign(x):
+    return 1 if x >= 0 else -1
+
+
+def _bisect(target: Callable[[int], int], start: int, end: int) -> int:
+    """
+    Integer bisect search
+    find zero of TARGET (or closest to zero value)
+    """
+    assert end > start
+
+    left = start
+    right = end
+
+    left_v = target(left)
+    right_v = target(right)
+
+    if left_v < 0 and right_v > 0:
+        direction = 1
+    elif left_v > 0 and right_v < 0:
+        direction = -1
+    else:
+        raise ValueError("Function must change sign between start and end")
+
+    while abs(left - right) > 1:
+        print(left, right)
+        middle = left + int((right - left) / 2)
+        val = target(middle)
+        if sign(val) * direction > 0:
+            right = middle
+        else:
+            left = middle
+
+    if abs(target(left)) < abs(target(right)):
+        return left
+    else:
+        return right
 
 
 def optimize_font_size(
@@ -75,24 +112,27 @@ def optimize_font_size(
     image = Image.new("1", (max_width + 1, max_height + 1))
     draw = ImageDraw.Draw(image)
 
-    def target(x):
-        """
-        Minimize me!
-        :param x: [font size, word wrap value]
-        :return: - font size (maximize font size)
-        """
-        font_size, max_text_len = _vec_to_val(x)
+    font = ImageFont.truetype(font_path, 40)
 
-        res = _target(font_size, max_text_len, max_width, max_height, text, font_path, draw, max_font)
+    def wrap_target(x):
+        res = _wrap_target(draw, max_width, max_height, text, font, x)
         return res
 
-    # x[0] - font size, x[1] - word wrap max phrase length
-    # For better optimization, try different initial values
-    best = min(
-        minimize(target, np.array([1.0, 5.0]), method="powell"),
-        minimize(target, np.array([1.0, 15.0]), method="powell"),
-        minimize(target, np.array([1.0, 25.0]), method="powell"),
-        key=lambda x: x.fun,
-    )
-    font_size, max_text_len = _vec_to_val(best.x)
-    return font_size, _wrap_word(text, max_text_len)
+    # Optimize word wrapping
+    if text.count(" "):
+        wrap = _bisect(wrap_target, 1, 200)
+    else:
+        wrap = 1000
+
+    def font_target(x):
+        """
+        Minimize me!
+        :param x: font size
+        """
+        res = _target(x, max_width, max_height, _wrap_word(text, wrap), font_path, draw, max_font)
+        return res
+
+    # Optimize font size
+    font_size = _bisect(font_target, 40, 1000)
+
+    return font_size, _wrap_word(text, wrap)
