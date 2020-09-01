@@ -1,7 +1,7 @@
 import io
 from enum import Enum
 from enum import auto as enum_auto
-from typing import Tuple
+from typing import Optional, Tuple
 
 from PIL import Image, ImageDraw, ImageFont
 from resizeimage.resizeimage import resize_crop
@@ -34,6 +34,7 @@ def add_text_on_image(
     path_to_font: str,
     wrap: bool = True,
     align: Align = Align.center,
+    fixed_font_size: Optional[int] = None,
 ):
     """
     Add text on Pillow image
@@ -44,6 +45,7 @@ def add_text_on_image(
     :param path_to_font: path to font file, str
     :param wrap: wrap text (default - True)
     :param align: text align
+    :param fixed_font_size: Font size. If not provided, font size will be adjusted
     :return: Pillow image
     """
 
@@ -51,9 +53,12 @@ def add_text_on_image(
     x0, x1 = int(x0 * pil_image.width), int(x1 * pil_image.width)
     y0, y1 = int(y0 * pil_image.height), int(y1 * pil_image.height)
 
-    font_size, wrapped_text = optimize_font_size(
-        pil_image, x1 - x0, y1 - y0, text, path_to_font, DesignerSettings.max_font_size(), wrap
-    )
+    if not fixed_font_size:
+        font_size, wrapped_text = optimize_font_size(
+            pil_image, x1 - x0, y1 - y0, text, path_to_font, DesignerSettings.max_font_size(), wrap
+        )
+    else:
+        font_size, wrapped_text = fixed_font_size, text
 
     # Create PIL font object
     font = ImageFont.truetype(path_to_font, font_size)

@@ -24,7 +24,7 @@ class BotSettings:
 
     @classmethod
     def access_cache_ttl(cls) -> int:
-        return 30  # in seconds
+        return 60  # in seconds
 
 
 class DesignerSettings:
@@ -35,6 +35,10 @@ class DesignerSettings:
     @classmethod
     def path_to_caption_font(cls) -> str:
         return join(abspath(dirname(__file__)), "designer", "Montserrat-ExtraBold.ttf")
+
+    @classmethod
+    def caption_fixed_font_size(cls) -> int:
+        return 65
 
     @classmethod
     def text_color_light(cls) -> Tuple[int, int, int]:

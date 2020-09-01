@@ -109,6 +109,7 @@ class TemplatesManager:
                 DesignerSettings.caption_text_position(),
                 align=Align.left,
                 path_to_font=DesignerSettings.path_to_caption_font(),
+                fixed_font_size=DesignerSettings.caption_fixed_font_size(),
             )
 
         if background:
