@@ -34,7 +34,7 @@ class BotSettings:
 class DesignerSettings:
     @classmethod
     def path_to_font(cls) -> str:
-        return join(abspath(dirname(__file__)), "designer", "Montserrat-Bold.ttf")
+        return join(abspath(dirname(__file__)), "designer", "Montserrat-SemiBold.ttf")
 
     @classmethod
     def path_to_caption_font(cls) -> str:
@@ -63,7 +63,7 @@ class DesignerSettings:
     @classmethod
     def text_position(cls) -> Tuple[float, float, float, float]:
         # Relative position x0, y0, x1, y1
-        return 0.09375, 0.25555, 0.90625, 0.72222
+        return 0.09375, 0.25555, 0.90625, 0.66666
 
     @classmethod
     def caption_text_position(cls) -> Tuple[float, float, float, float]:
