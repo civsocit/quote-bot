@@ -26,6 +26,16 @@ class FilterDuplicatedSpaces(TextFilter):
         return re.sub(r"\s{2,}", " ", text_in)
 
 
+class FilterBadHyphen(TextFilter):
+    @classmethod
+    def process(cls, text_in: str) -> str:
+        """
+        Replace bad hyphens
+        Example: "A - is B" -> "A — is B"
+        """
+        return text_in.replace(" - ", " — ")
+
+
 class FilterHangingPreposition(TextFilter):
     analyzer = pymorphy2.MorphAnalyzer()
 
@@ -34,12 +44,15 @@ class FilterHangingPreposition(TextFilter):
         """
         Place non-breaking spaces after prepositions, conjunctions
         Example: 'привет и пока' -> 'привет и\xa0пока'
+        Example: 'из-за двери перекати-поле' -> 'из\u2011за двери перекати-поле'
         """
         text = text_in
         words = text.split()
         for word in words:
-            if cls.analyzer.parse(word)[0].tag.POS in ("PREP", "CONJ") and len(word) < 4:
-                text = text.replace(" " + word + " ", " " + word + "\xa0")
+            if cls.analyzer.parse(word)[0].tag.POS in ("PREP", "CONJ") and len(word) < 6:
+                text = text.replace(" " + word + " ", " " + word + "\u00a0")  # non-breaking space
+                if "-" in word:
+                    text = text.replace(word, word.replace("-", "\u2011"))  # non-breaking hyphen
         return text
 
 
