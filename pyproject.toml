@@ -13,6 +13,7 @@ Pillow = "^7.2.0"
 aiocache = "^0.11.1"
 python-resize-image = "^1.1.19"
 boto3 = "^1.14.51"
+pymorphy2 = "^0.8"
 
 [tool.poetry.dev-dependencies]
 isort = "^5.1.4"

@@ -11,6 +11,7 @@ from PIL import Image
 
 from quote_bot.designer import Align, add_background_on_image, add_text_on_image, compile_image, fill_color
 from quote_bot.settings import DesignerSettings
+from quote_bot.textmanager import process as prepare_text
 
 
 class TemplateType(Enum):
@@ -90,8 +91,8 @@ class TemplatesManager:
             text, caption = text.split("@", maxsplit=1)
         else:
             caption = ""
-        text = text.strip()
-        caption = caption.strip()
+        text = prepare_text(text)
+        caption = prepare_text(caption)
 
         pil_image = add_text_on_image(
             template.pil_image,
