@@ -83,7 +83,10 @@ def _bisect(target: Callable[[int], int], start: int, end: int) -> int:
     elif left_v == 0 and right_v == 0:
         return start
     else:
-        raise ValueError("Function must change sign between start and end")
+        if abs(left_v) < abs(right_v):
+            return left
+        else:
+            return right
 
     while abs(left - right) > 1:
         middle = left + int((right - left) / 2)
