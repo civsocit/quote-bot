@@ -3,8 +3,8 @@ from enum import Enum
 from enum import auto as enum_auto
 from typing import Optional, Tuple
 
-from PIL import Image, ImageDraw, ImageFont
 import resizeimage.resizeimage as resizer
+from PIL import Image, ImageDraw, ImageFont
 
 from ..optimizator import optimize_font_size
 from ..settings import DesignerSettings

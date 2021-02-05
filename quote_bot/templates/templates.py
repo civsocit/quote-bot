@@ -9,7 +9,7 @@ from typing import Dict, Optional, Tuple
 
 from PIL import Image
 
-from quote_bot.designer import add_background_on_image, add_text_on_image, compile_image, Align
+from quote_bot.designer import Align, add_background_on_image, add_text_on_image, compile_image
 from quote_bot.settings import DesignerSettings
 from quote_bot.textmanager import process as prepare_text
 
@@ -61,9 +61,7 @@ class Template:
 
     @property
     def text_color(self) -> Tuple[int, int, int]:
-        return {
-            TemplateType.main: DesignerSettings.text_color_light(),
-        }[self._type]
+        return {TemplateType.main: DesignerSettings.text_color_light()}[self._type]
 
 
 class TemplatesManager:
@@ -93,7 +91,8 @@ class TemplatesManager:
         )
 
         if background:
-            pil_image = add_background_on_image(pil_image, Image.open(background),
-                                                int(DesignerSettings.background_border() * pil_image.width))
+            pil_image = add_background_on_image(
+                pil_image, Image.open(background), int(DesignerSettings.background_border() * pil_image.width)
+            )
 
         return compile_image(pil_image)
