@@ -1,0 +1,8 @@
+version: "3.9"
+services:
+  bot:
+    container_name: quote-bot-liberal
+    restart: unless-stopped
+    build: .
+    env_file:
+      - ./.env
