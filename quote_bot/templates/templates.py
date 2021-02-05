@@ -9,14 +9,13 @@ from typing import Dict, Optional, Tuple
 
 from PIL import Image
 
-from quote_bot.designer import Align, add_background_on_image, add_text_on_image, compile_image, fill_color
+from quote_bot.designer import add_background_on_image, add_text_on_image, compile_image, Align
 from quote_bot.settings import DesignerSettings
 from quote_bot.textmanager import process as prepare_text
 
 
 class TemplateType(Enum):
-    black = enum_auto()
-    white = enum_auto()
+    main = enum_auto()
 
 
 class Template:
@@ -28,7 +27,7 @@ class Template:
         self._type = _type
         self._path = path
 
-        self._pil_image = Image.open(path)
+        self._pil_image = Image.open(path).convert("RGBA")
 
         with BytesIO() as output:
             preview = self.pil_image
@@ -57,17 +56,13 @@ class Template:
         return copy(self._png_preview)
 
     @property
-    def text_color(self) -> Tuple[int, int, int]:
-        return {
-            TemplateType.black: DesignerSettings.text_color_light(),
-            TemplateType.white: DesignerSettings.text_color_dark(),
-        }[self._type]
+    def background_size(self) -> Tuple[int, int]:
+        return int((1 - DesignerSettings.background_border()) * self._pil_image.width), self._pil_image.height
 
     @property
-    def background_color(self) -> Tuple[int, int, int]:
+    def text_color(self) -> Tuple[int, int, int]:
         return {
-            TemplateType.black: DesignerSettings.background_color_dark(),
-            TemplateType.white: DesignerSettings.background_color_light(),
+            TemplateType.main: DesignerSettings.text_color_light(),
         }[self._type]
 
 
@@ -77,8 +72,7 @@ class TemplatesManager:
 
     def __init__(self):
         self._templates = {
-            "black": Template(join_path(self._path_to_templates, "black.png"), TemplateType.black),
-            "white": Template(join_path(self._path_to_templates, "white.png"), TemplateType.white),
+            "main": Template(join_path(self._path_to_templates, "main.png"), TemplateType.main),
         }
 
     def all_templates(self) -> Dict[str, Template]:
@@ -87,35 +81,19 @@ class TemplatesManager:
     def process_template(self, identifier: str, text: str, background: Optional[BytesIO] = None) -> bytes:
         template = self._templates[identifier]
 
-        if "@" in text:
-            text, caption = text.split("@", maxsplit=1)
-        else:
-            caption = ""
         text = prepare_text(text)
-        caption = prepare_text(caption)
 
         pil_image = add_text_on_image(
             template.pil_image,
             text,
             template.text_color,
             DesignerSettings.text_position(),
+            align=Align.left,
             path_to_font=DesignerSettings.path_to_font(),
         )
 
-        if caption:
-            pil_image = add_text_on_image(
-                pil_image,
-                caption,
-                template.text_color,
-                DesignerSettings.caption_text_position(),
-                align=Align.left,
-                path_to_font=DesignerSettings.path_to_caption_font(),
-                fixed_font_size=DesignerSettings.caption_fixed_font_size(),
-            )
-
         if background:
-            pil_image = add_background_on_image(pil_image, Image.open(background))
-        else:
-            pil_image = fill_color(pil_image, template.background_color)
+            pil_image = add_background_on_image(pil_image, Image.open(background),
+                                                int(DesignerSettings.background_border() * pil_image.width))
 
         return compile_image(pil_image)

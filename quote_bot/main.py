@@ -28,8 +28,7 @@ async def start(message: types.Message, state: FSMContext):
 
     await message.answer(
         "Привет. Я бот для создания шаблонных цитат с логотипом Гражданского Общества. "
-        "Отправь /templates чтобы получить список шаблонов цитат\n\n"
-        "Я работаю на AWS. Я медленный, но надёжный"
+        "Отправь /templates чтобы получить список шаблонов цитат."
     )
 
 
@@ -121,11 +120,10 @@ async def process_callback(callback_query: types.CallbackQuery, state: FSMContex
         await bot.send_message(callback_query.from_user.id, "Такого шаблона не существует")
         return
 
-    size = templates_manager.all_templates()[template].pil_image.size
+    size = templates_manager.all_templates()[template].background_size
     await bot.send_message(
         callback_query.from_user.id,
         f"Выбран шаблон {template}, теперь отправьте текст для плаката.\n\n"
-        f"Чтобы указать автора цитаты, отправьте его имя после @ в формате 'Текст @ Автор'\n\n"
         f"Вы также можете отправить картинку на фон "
         f"плаката {size[0]}x{size[1]} (картинки других размеров будут растянуты/обрезаны)\n\n"
         f"Чтобы вернуться к списку шаблонов отправьте /templates",

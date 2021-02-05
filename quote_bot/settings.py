@@ -37,37 +37,27 @@ class DesignerSettings:
         return join(abspath(dirname(__file__)), "designer", "Montserrat-SemiBold.ttf")
 
     @classmethod
-    def path_to_caption_font(cls) -> str:
-        return join(abspath(dirname(__file__)), "designer", "Montserrat-ExtraBold.ttf")
-
-    @classmethod
-    def caption_fixed_font_size(cls) -> int:
-        return 65
-
-    @classmethod
     def text_color_light(cls) -> Tuple[int, int, int]:
-        return 0xE1, 0xE6, 0xEB
-
-    @classmethod
-    def text_color_dark(cls) -> Tuple[int, int, int]:
-        return 0x19, 0x2D, 0x44
-
-    @classmethod
-    def background_color_dark(cls) -> Tuple[int, int, int]:
-        return 0x00, 0x00, 0x00
-
-    @classmethod
-    def background_color_light(cls) -> Tuple[int, int, int]:
-        return 0xE1, 0xE6, 0xEB
+        return 0xF2, 0xF2, 0xF2
 
     @classmethod
     def text_position(cls) -> Tuple[float, float, float, float]:
         # Relative position x0, y0, x1, y1
-        return 0.09375, 0.25555, 0.90625, 0.66666
+        return 57/1280, 175/730, 654/1280, 489/730
 
     @classmethod
-    def caption_text_position(cls) -> Tuple[float, float, float, float]:
-        return 0.5 / 16, 0.4 / 9, 6 / 16, 1 / 9
+    def background_border(cls) -> float:
+        """
+                           | <- border
+        ---------------------------------
+        |                  |            |
+        |                  |            |
+        |   Some text      | Background |
+        |                  |            |
+        |                  |            |
+        ---------------------------------
+        """
+        return 1048/1836
 
     @classmethod
     def default_width(cls) -> int:

@@ -4,7 +4,7 @@ from enum import auto as enum_auto
 from typing import Optional, Tuple
 
 from PIL import Image, ImageDraw, ImageFont
-from resizeimage.resizeimage import resize_crop
+import resizeimage.resizeimage as resizer
 
 from ..optimizator import optimize_font_size
 from ..settings import DesignerSettings
@@ -73,7 +73,14 @@ def add_text_on_image(
     return pil_image
 
 
-def _resize_to_max(req_size: Tuple[int, int], image):
+def _stretch_to_maximum_edge(image, req_size: Tuple[int, int]):
+    """
+    Resize image
+           --------------        --------      ----------------------------
+    Image  |            | + size |      |  ->  |                          |
+           --------------        |      |      |                          |
+                                 --------      ----------------------------
+    """
     if req_size[0] > image.size[0]:
         image = image.resize((req_size[0], int(req_size[0] / image.size[0] * image.size[1])))
     if req_size[1] > image.size[1]:
@@ -81,19 +88,47 @@ def _resize_to_max(req_size: Tuple[int, int], image):
     return image
 
 
-def add_background_on_image(pil_image, background_pil):
+def _compress_to_maximum_edge(image, req_size: Tuple[int, int]):
+    """
+    Resize image
+          ------------------         ------     ------------
+          |                |         |    |     |          |
+    Image |                |  + size |    |  -> |          |
+          |                |         ------     ------------
+          ------------------
+    """
+    return resizer.resize_cover(image, req_size)
+
+
+def resize_image(image, req_size: Tuple[int, int]):
+    """
+    Resize image: compress or stretch
+    """
+    if image.size[0] < req_size[0] or image.size[1] < req_size[1]:
+        return _stretch_to_maximum_edge(image, req_size)
+    if image.size[0] > req_size[0] and image.size[1] > req_size[1]:
+        return _compress_to_maximum_edge(image, req_size)
+
+
+def add_background_on_image(pil_image, background_pil, x_position: int = 0):
     """
     Add background on image
     :param pil_image: PIL Image
     :param background_pil: background to add PIL Image
+    :param x_position: background offset, pixels
     :return: PIL Image
     """
-    background_pil = _resize_to_max(pil_image.size, background_pil)
-    background_pil = resize_crop(background_pil, pil_image.size)
+    background_box = pil_image.size[0] - x_position, pil_image.size[1]
+    print("Background box: ", background_box)
+    print("Background size: ", background_pil.size)
+    background_pil = resize_image(background_pil, background_box)
+    print("Resized: ", background_pil.size)
+    background_pil = resizer.resize_crop(background_pil, background_box)
+    print("Cropped: ", background_pil.size)
 
-    background_pil.paste(pil_image, (0, 0), pil_image)
+    pil_image.paste(background_pil, (x_position, 0))
 
-    return background_pil
+    return pil_image
 
 
 def fill_color(pil_image, color: Tuple[int, int, int]):
