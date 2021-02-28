@@ -1,6 +1,6 @@
 version: "3.9"
 services:
-  bot:
+  libbot:
     container_name: quote-bot-liberal
     restart: unless-stopped
     build: .
