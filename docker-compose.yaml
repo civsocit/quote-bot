@@ -1,4 +1,4 @@
-version: "3.9"
+version: "3.3"
 services:
   libbot:
     container_name: quote-bot-liberal
