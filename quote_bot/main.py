@@ -5,7 +5,7 @@ import boto3
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
-from aiogram.types import ContentType, InputFile
+from aiogram.types import InputFile
 
 from quote_bot.access import AccessMiddleware
 from quote_bot.access import public as public_command
@@ -79,36 +79,6 @@ async def process_text(message: types.Message, state: FSMContext):
             await _go_template(message, proxy, template)
 
 
-async def process_image(message: types.Message, state: FSMContext):
-    """
-    File (image) handler
-    """
-    if "image" not in message.document.mime_type:
-        await message.answer("Это не изображение")
-        return
-
-    async with state.proxy() as proxy:
-        template = proxy.get("template")
-        if not template or template not in templates_manager.all_templates():
-            await message.answer("Сначала выберите шаблон в меню /templates")
-            return
-
-        proxy["background"] = message.document.file_id
-
-        if not proxy.get("text"):
-            await message.answer("Фон загружен. Теперь отправьте текст для цитаты.")
-            return
-
-        await _go_template(message, proxy, template)
-
-
-async def process_photo(message: types.Message, state: FSMContext):
-    """
-    Photo handler
-    """
-    await message.answer("Отправьте это фото 'как файл' для лучшего качества")
-
-
 async def process_callback(callback_query: types.CallbackQuery, state: FSMContext):
     """
     Template selection handler
@@ -144,8 +114,6 @@ async def register_handlers(dp: Dispatcher):
     dp.register_message_handler(get_chat_id, commands=["chat_id"])
     dp.register_message_handler(process_text, content_types=["text"])
     dp.register_callback_query_handler(process_callback)
-    dp.register_message_handler(process_photo, content_types=[ContentType.PHOTO])
-    dp.register_message_handler(process_image, content_types=[ContentType.DOCUMENT])
 
     dp.middleware.setup(AccessMiddleware(BotSettings.access_chat_id()))
 

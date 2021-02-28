@@ -43,7 +43,7 @@ class DesignerSettings:
     @classmethod
     def text_position(cls) -> Tuple[float, float, float, float]:
         # Relative position x0, y0, x1, y1
-        return 57 / 1280, 175 / 730, 654 / 1280, 489 / 730
+        return 77 / 1200, 200 / 620, 1133 / 1200, 365 / 620
 
     @classmethod
     def background_border(cls) -> float:

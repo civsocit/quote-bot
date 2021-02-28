@@ -9,7 +9,7 @@ from typing import Dict, Optional, Tuple
 
 from PIL import Image
 
-from quote_bot.designer import Align, add_background_on_image, add_text_on_image, compile_image
+from quote_bot.designer import Align, add_text_on_image, compile_image
 from quote_bot.settings import DesignerSettings
 from quote_bot.textmanager import process as prepare_text
 
@@ -70,7 +70,7 @@ class TemplatesManager:
 
     def __init__(self):
         self._templates = {
-            "main": Template(join_path(self._path_to_templates, "main.png"), TemplateType.main),
+            "main": Template(join_path(self._path_to_templates, "mos.png"), TemplateType.main),
         }
 
     def all_templates(self) -> Dict[str, Template]:
@@ -91,8 +91,6 @@ class TemplatesManager:
         )
 
         if background:
-            pil_image = add_background_on_image(
-                pil_image, Image.open(background), int(DesignerSettings.background_border() * pil_image.width)
-            )
+            raise NotImplemented("Not implemented in this version")
 
         return compile_image(pil_image)
